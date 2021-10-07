@@ -1,0 +1,2 @@
+CREATE DATABASE celery;
+CREATE DATABASE airflow;

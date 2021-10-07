@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  spark:
+    build: ./spark
+    # volumes:
+    #   - ./spark/src:/opt/work-dir
+    restart: unless-stopped
+    command: sleep infinity
+  airflow:
+    build: ./airflow
+    restart: unless-stopped
+    env_file:
+      - ./airflow/.env
+    environment:
+      - AIRFLOW__CORE__FERNET_KEY=PeszOD9t6wKNdNONTGh-k4qsYbsGHQ8CSqTQZlqPCDk=
+      - AIRFLOW_HOME=/opt/airflow
+    ports:
+      - 8000:8000 #ui
+      - 5555:5555 #flower
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: sleep infinity
+
+  airflow-spark-queue:
+    build: ./airflow
+    restart: unless-stopped
+    environment:
+      - AIRFLOW__CORE__FERNET_KEY=PeszOD9t6wKNdNONTGh-k4qsYbsGHQ8CSqTQZlqPCDk=
+      - AIRFLOW_HOME=/opt/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+    command: airflow celery worker -q spark
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=bitcoin
+    ports:
+      - 5432:5432
+    volumes:
+      - ./airflow/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
