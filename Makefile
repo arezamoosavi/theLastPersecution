@@ -21,7 +21,7 @@ stop-spark:
 
 airflow:
 	docker-compose up -d airflow
-	sleep 15
+	sleep 5
 	docker-compose up -d airflow-spark-queue
 
 scale-spark-queue:

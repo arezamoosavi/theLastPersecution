@@ -1,5 +1,13 @@
 version: "3"
 
+# web:
+#   extends:
+#     service: base
+#   ...
+# db:
+#   extends:
+#     service: base
+
 services:
   spark:
     build: ./spark
@@ -7,30 +15,26 @@ services:
     #   - ./spark/src:/opt/work-dir
     restart: unless-stopped
     command: sleep infinity
-  airflow:
+
+  airflow-spark-queue: &air
     build: ./airflow
     restart: unless-stopped
     env_file:
-      - ./airflow/.env
-    environment:
-      - AIRFLOW__CORE__FERNET_KEY=PeszOD9t6wKNdNONTGh-k4qsYbsGHQ8CSqTQZlqPCDk=
-      - AIRFLOW_HOME=/opt/airflow
-    ports:
-      - 8000:8000 #ui
-      - 5555:5555 #flower
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
-    command: sleep infinity
-
-  airflow-spark-queue:
-    build: ./airflow
-    restart: unless-stopped
+      - ./airflow/.env_var
     environment:
       - AIRFLOW__CORE__FERNET_KEY=PeszOD9t6wKNdNONTGh-k4qsYbsGHQ8CSqTQZlqPCDk=
       - AIRFLOW_HOME=/opt/airflow
     volumes:
       - ./airflow/dags:/opt/airflow/dags
     command: airflow celery worker -q spark
+
+  airflow:
+    <<: *air
+    ports:
+      - 8000:8000 #ui
+      - 5555:5555 #flower
+    command: sh ../../run.sh
+    # command: sleep infinity
 
   postgres:
     image: postgres:latest
