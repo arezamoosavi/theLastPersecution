@@ -59,7 +59,7 @@ logging:
 setup_k8s:
 	kubectl create serviceaccount spark
 	kubectl create clusterrolebinding spark-role --clusterrole=edit  --serviceaccount=default:spark --namespace=default
-	kubectl get secrets -o jsonpath="{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='spark')].data.token}"|base64 --decode
+	kubectl get secrets -o jsonpath="{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='spark')].data.token}"|base64 --decode && echo
 	echo -n|openssl s_client -connect 192.168.0.1:6443|openssl x509 -outform PEM > ../airflow/dags/certificate.pem
 	
 	kubectl get secret

@@ -33,8 +33,8 @@ services:
     ports:
       - 8000:8000 #ui
       - 5555:5555 #flower
-    # command: sh ../../run.sh
-    command: sleep infinity
+    command: sh ../../run.sh
+    # command: sleep infinity
 
   postgres:
     image: postgres:latest
@@ -46,4 +46,14 @@ services:
       - 5432:5432
     volumes:
       - ./airflow/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  superset:
+    image: arezamoosavi/superset:latest
+    container_name: superset
+    environment:
+      ADMIN_USERNAME: admin
+      ADMIN_PWD: admin
+    ports:
+      - 8088:8088
     restart: unless-stopped

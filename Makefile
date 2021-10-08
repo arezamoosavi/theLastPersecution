@@ -31,5 +31,8 @@ stop-airflow:
 	docker-compose stop airflow airflow-spark-queue
 	echo y | docker-compose rm airflow airflow-spark-queue
 
+superset:
+	docker-compose up -d superset
+
 down:
 	docker-compose down -v
