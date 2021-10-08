@@ -10,7 +10,7 @@ pg:
 	docker-compose up -d postgres
 
 build-spark:
-	docker-compose up --build -d spark
+	docker-compose build spark
 
 exec-spark:
 	docker-compose exec spark bash

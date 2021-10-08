@@ -21,11 +21,13 @@ kind-dash:
 start-cluster:
 	sh kind-with-registry.sh
 
-docker-build:
+docker-images:
 	docker container ls
 	docker images
+
+docker-tag:
 	docker tag thelastpersecution_spark 192.168.0.1:5000/main-spark:latest
-	
+
 docker-push:
 	docker push 192.168.0.1:5000/main-spark:latest
 
@@ -57,22 +59,24 @@ logging:
 setup_k8s:
 	kubectl create serviceaccount spark
 	kubectl create clusterrolebinding spark-role --clusterrole=edit  --serviceaccount=default:spark --namespace=default
-	echo -n|openssl s_client -connect 192.168.0.1:6443|openssl x509 -outform PEM > selfsigned_certificate.pem
+	kubectl get secrets -o jsonpath="{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='spark')].data.token}"|base64 --decode
+	echo -n|openssl s_client -connect 192.168.0.1:6443|openssl x509 -outform PEM > ../airflow/dags/certificate.pem
+	
 	kubectl get secret
 	kubectl describe secret spark-token
 	# add this token to spark-submit
 	kubectl cluster-info
 
-run-k8s:
+run-on-k8s-cluster:
 	kubectl cluster-info
 	./bin/spark-submit --verbose --master k8s://https://192.168.0.1:6443 --deploy-mode cluster --py-files local:///opt/work-dir/utils/common.py --conf spark.kubernetes.container.image.pullPolicy=Always --conf spark.executor.instances=1 --conf spark.executor.memory=2G --conf spark.executor.cores=1 --conf spark.driver.memory=1G --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark --conf spark.kubernetes.container.image=192.168.0.1:5000/main-spark:latest --jars local:///opt/spark/jars/postgresql-42.2.5.jar local:///opt/work-dir/spark_load_data.py 192.168.0.1
 
 
-run-more-adv:
+run-airflow-spark:
 	spark-submit --verbose --master k8s://https://192.168.0.1:6443 \
 	--deploy-mode cluster \
 	--py-files local:///opt/work-dir/utils/common.py \
-	--conf spark.kubernetes.authenticate.submission.caCertFile=dags/selfsigned_certificate.pem \
+	--conf spark.kubernetes.authenticate.submission.caCertFile=dags/certificate.pem \
 	--conf spark.kubernetes.authenticate.submission.oauthToken=${spark_token} \
 	--conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
 	--conf spark.kubernetes.driver.pod.name=bitcoin-app \
