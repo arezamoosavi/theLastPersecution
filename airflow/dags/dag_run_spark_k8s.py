@@ -36,14 +36,14 @@ task_spark_load = BashOperator(
 	--conf spark.kubernetes.authenticate.submission.caCertFile={{var.value.airflow_home}}/dags/certificate.pem \
 	--conf spark.kubernetes.authenticate.submission.oauthToken={{var.value.spark_token}} \
 	--conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-	--conf spark.kubernetes.driver.pod.name=bitcoin-app-{{ds}} \
+	--conf spark.kubernetes.driver.pod.name=bitcoin-load-app \
 	--conf spark.kubernetes.container.image.pullPolicy=Always \
 	--conf spark.executor.instances=2 \
 	--conf spark.executor.memory=2G \
 	--conf spark.executor.cores=1 \
 	--conf spark.driver.memory=1G \
 	--conf spark.kubernetes.container.image=192.168.0.1:5000/main-spark:latest \
-	--name bitcoin-app \
+	--name bitcoin-app1 \
 	--jars local:///opt/spark/jars/postgresql-42.2.5.jar \
 	local:///opt/work-dir/spark_load_data.py 192.168.0.1
     """,
@@ -59,14 +59,14 @@ task_spark_transform = BashOperator(
 	--conf spark.kubernetes.authenticate.submission.caCertFile={{var.value.airflow_home}}/dags/certificate.pem \
 	--conf spark.kubernetes.authenticate.submission.oauthToken={{var.value.spark_token}} \
 	--conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-	--conf spark.kubernetes.driver.pod.name=bitcoin-app-trf \
+	--conf spark.kubernetes.driver.pod.name=bitcoin-transfer-app \
 	--conf spark.kubernetes.container.image.pullPolicy=Always \
 	--conf spark.executor.instances=2 \
 	--conf spark.executor.memory=2G \
 	--conf spark.executor.cores=1 \
 	--conf spark.driver.memory=1G \
 	--conf spark.kubernetes.container.image=192.168.0.1:5000/main-spark:latest \
-	--name bitcoin-app \
+	--name bitcoin-app2 \
 	--jars local:///opt/spark/jars/postgresql-42.2.5.jar \
 	local:///opt/work-dir/spark_transform_data.py 192.168.0.1
     """,

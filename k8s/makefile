@@ -17,6 +17,7 @@ kind-dash:
 	token=$(kubectl get secrets -o jsonpath="{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='default')].data.token}"|base64 --decode)
 	echo ${token}
 	kubectl proxy
+	#http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
 
 start-cluster:
 	sh kind-with-registry.sh
